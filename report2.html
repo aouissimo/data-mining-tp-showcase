@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ID3 Visual Explorer - Presentation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Inter, sans-serif; background: #050816; color: #f8fafc; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+    .deck { position: relative; width: 1280px; height: 720px; overflow: hidden; border-radius: 24px; background: linear-gradient(135deg, #081224, #0f172a 55%, #111827); box-shadow: 0 40px 100px rgba(0,0,0,.65); }
+    .slide { display: none; position: absolute; inset: 0; padding: 46px 56px; }
+    .slide.active { display: block; }
+    .slide::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(148,163,184,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,.06) 1px, transparent 1px); background-size: 42px 42px; opacity: .22; pointer-events: none; }
+    .inner { position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; }
+    .kicker { display: inline-block; width: fit-content; padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(96,165,250,.25); background: rgba(96,165,250,.12); color: #bfdbfe; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+    h1 { font-size: 48px; line-height: 1.04; letter-spacing: -.04em; margin-top: 20px; }
+    h2 { font-size: 22px; color: rgba(226,232,240,.78); margin-top: 12px; font-weight: 500; }
+    .accent { color: #60a5fa; }
+    .spacer { flex: 1; }
+    .grid2, .grid3, .grid5 { display: grid; gap: 18px; margin-top: 28px; }
+    .grid2 { grid-template-columns: repeat(2, 1fr); }
+    .grid3 { grid-template-columns: repeat(3, 1fr); }
+    .grid5 { grid-template-columns: repeat(5, 1fr); }
+    .card, .panel, .code { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: 20px; padding: 20px; }
+    .card h3, .panel h3 { font-size: 18px; margin-bottom: 10px; }
+    .card p, .panel p, li { color: rgba(226,232,240,.78); font-size: 14px; line-height: 1.6; }
+    ul { margin-top: 10px; padding-left: 18px; }
+    .meta { margin-top: 18px; padding: 14px 18px; border-radius: 16px; background: rgba(15,23,42,.64); border: 1px solid rgba(96,165,250,.16); color: rgba(248,250,252,.86); font-size: 14px; }
+    .split { display: grid; grid-template-columns: 1.05fr .95fr; gap: 18px; margin-top: 28px; flex: 1; }
+    .code { font-family: "JetBrains Mono", monospace; white-space: pre-wrap; font-size: 13px; line-height: 1.7; color: #dbeafe; }
+    .chips { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
+    .chip { padding: 8px 12px; border-radius: 999px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); font-size: 12px; color: rgba(248,250,252,.9); }
+    .hero { display: grid; grid-template-columns: 1.2fr .8fr; gap: 24px; align-items: center; flex: 1; }
+    .hero-box { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); border-radius: 24px; padding: 26px; min-height: 320px; display: flex; align-items: center; justify-content: center; }
+    .hero-graph { font-family: "JetBrains Mono", monospace; color: #bfdbfe; font-size: 18px; line-height: 1.7; }
+    .controls { position: absolute; right: 24px; bottom: 20px; display: flex; gap: 10px; z-index: 4; }
+    .btn { width: 46px; height: 46px; border: 1px solid rgba(255,255,255,.12); border-radius: 50%; background: rgba(255,255,255,.06); color: #fff; cursor: pointer; }
+    .indicator { position: absolute; left: 28px; bottom: 32px; z-index: 4; font-family: "JetBrains Mono", monospace; font-size: 13px; color: rgba(226,232,240,.45); }
+  </style>
+</head>
+<body>
+  <div class="deck">
+    <section class="slide active">
+      <div class="inner">
+        <div class="hero">
+          <div>
+            <div class="kicker">Data Mining TP 2026</div>
+            <h1>ID3 <span class="accent">Visual Explorer</span></h1>
+            <h2>Extracting actionable intelligence from raw datasets with an interactive decision-tree application.</h2>
+            <div class="chips">
+              <div class="chip">KDD Pipeline</div>
+              <div class="chip">React + TypeScript</div>
+              <div class="chip">Interactive Tree</div>
+            </div>
+          </div>
+          <div class="hero-box">
+            <div class="hero-graph">ID3
+|- Gain
+|  |- Leaf
+|  |- Leaf
+|- Tree
+   |- Leaf
+   |- Leaf</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="inner">
+        <div class="kicker">Knowledge Discovery</div>
+        <h1>The <span class="accent">KDD Pipeline</span></h1>
+        <h2>From raw records to interpretable knowledge.</h2>
+        <div class="grid5">
+          <div class="card"><h3>1. Selection</h3><p>Choose datasets that represent both simple and realistic classification cases.</p></div>
+          <div class="card"><h3>2. Preprocessing</h3><p>Handle missing values and prepare the data before mining.</p></div>
+          <div class="card"><h3>3. Transformation</h3><p>Convert continuous values into categories for ID3.</p></div>
+          <div class="card"><h3>4. Mining</h3><p>Use entropy and information gain to generate the tree.</p></div>
+          <div class="card"><h3>5. Interpretation</h3><p>Display the learned model in a visual and explainable form.</p></div>
+        </div>
+        <div class="meta">Objective: transform raw data into a transparent and usable classification model.</div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="inner">
+        <div class="kicker">Program Used</div>
+        <h1>Software <span class="accent">Stack Behind the Project</span></h1>
+        <h2>This presentation now explains the actual program used to build and run the project.</h2>
+        <div class="grid5">
+          <div class="card"><h3>React</h3><p>Builds the interface for dataset switching, preprocessing, and model output.</p></div>
+          <div class="card"><h3>TypeScript</h3><p>Keeps dataset rows and tree nodes structured and easier to maintain.</p></div>
+          <div class="card"><h3>Vite</h3><p>Runs the local development server and creates the production build.</p></div>
+          <div class="card"><h3>React Flow + D3</h3><p>Lay out and render the decision tree as an interactive graph.</p></div>
+          <div class="card"><h3>Motion + Icons</h3><p>Improve clarity with transitions and interface cues.</p></div>
+        </div>
+        <div class="chips">
+          <div class="chip">npm install</div>
+          <div class="chip">npm run dev</div>
+          <div class="chip">npm run build</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="inner">
+        <div class="kicker">Code Structure</div>
+        <h1>How the <span class="accent">Code Is Organized</span></h1>
+        <h2>Each file maps to a clear part of the workflow.</h2>
+        <div class="split">
+          <div class="panel">
+            <h3>Main files</h3>
+            <ul>
+              <li><strong>`src/App.tsx`</strong>: controls dataset selection, preprocessing actions, training, and log state.</li>
+              <li><strong>`src/utils/sample-data.ts`</strong>: stores the Weather and Titanic sample datasets.</li>
+              <li><strong>`src/utils/preprocessing.ts`</strong>: cleaning, normalization, and discretization functions.</li>
+              <li><strong>`src/utils/id3-core.ts`</strong>: entropy, information gain, recursive tree building, and prediction.</li>
+              <li><strong>`src/components/TreeVisualizer.tsx`</strong>: turns the learned tree into a visual graph.</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h3>Runtime flow</h3>
+            <ul>
+              <li>1. Load Weather or Titanic data.</li>
+              <li>2. Apply preprocessing functions.</li>
+              <li>3. Call <strong>`buildID3Tree()`</strong>.</li>
+              <li>4. Display the result in the visualizer.</li>
+            </ul>
+            <div class="meta">The code structure mirrors the KDD pipeline step by step.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="inner">
+        <div class="kicker">Raw Data</div>
+        <h1>Understanding the <span class="accent">Datasets</span></h1>
+        <h2>The project uses one clean baseline dataset and one more realistic sample dataset.</h2>
+        <div class="grid2">
+          <div class="panel">
+            <h3>Weather (Play Tennis)</h3>
+            <ul>
+              <li>14 records with categorical attributes.</li>
+              <li>Useful for validating entropy and information gain.</li>
+              <li>Target label: <strong>`Play`</strong>.</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h3>Titanic Passenger Sample</h3>
+            <ul>
+              <li>13 sample records with numeric values and one missing age value.</li>
+              <li>Shows why preprocessing is needed before mining.</li>
+              <li>Target label: <strong>`Survived`</strong>.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="meta">Weather gives a clean baseline, while Titanic demonstrates preprocessing and transformation challenges.</div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="inner">
+        <div class="kicker">Preprocessing</div>
+        <h1>Cleaning and <span class="accent">Transformation</span></h1>
+        <h2>The app prepares the data before ID3 training.</h2>
+        <div class="split">
+          <div class="panel">
+            <h3>Data cleaning</h3>
+            <ul>
+              <li><strong>`handleMissingValues()`</strong> detects null, undefined, and empty values.</li>
+              <li>Mode imputation fills missing values with the most frequent value.</li>
+              <li>The application logs each preprocessing step for explanation.</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h3>Data transformation</h3>
+            <ul>
+              <li><strong>`minMaxNormalize()`</strong> scales numeric columns when needed.</li>
+              <li><strong>`discretizeEqualWidth(data, 'Age', 3)`</strong> converts age values into bins.</li>
+              <li>After transformation, the data is compatible with ID3 splitting.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="inner">
+        <div class="kicker">ID3 Logic</div>
+        <h1>ID3 <span class="accent">Logic in Code</span></h1>
+        <h2>The algorithm measures uncertainty, compares attributes, and builds the tree recursively.</h2>
+        <div class="split">
+          <div class="panel">
+            <h3>Main functions</h3>
+            <ul>
+              <li><strong>`calculateEntropy()`</strong> measures class impurity.</li>
+              <li><strong>`calculateInfoGain()`</strong> compares candidate attributes.</li>
+              <li><strong>`buildID3Tree()`</strong> repeats the split until a leaf node is reached.</li>
+            </ul>
+            <div class="meta">Entropy(S) = - sum( p(i) * log2(p(i)) )</div>
+          </div>
+          <div class="code">calculateEntropy(data, targetAttr)
+calculateInfoGain(data, attr, targetAttr)
+buildID3Tree(data, targetAttr, remainingAttrs)
+
+if (labels.length === 1) {
+  return { isLeaf: true, label: labels[0] }
+}</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="inner">
+        <div class="kicker">Visualization</div>
+        <h1>Visualizing the <span class="accent">Knowledge</span></h1>
+        <h2>The learned model is displayed as an explorable decision tree inside the app.</h2>
+        <div class="split">
+          <div class="panel">
+            <h3>Interface features</h3>
+            <ul>
+              <li>Switch between Weather and Titanic datasets.</li>
+              <li>Apply cleaning, normalization, and discretization buttons.</li>
+              <li>Build the model and inspect the decision tree view.</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h3>Visualization code</h3>
+            <ul>
+              <li><strong>`TreeVisualizer.tsx`</strong> converts the tree into nodes and edges.</li>
+              <li>D3 computes the hierarchy layout.</li>
+              <li>React Flow renders the interactive graph.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="inner">
+        <div class="kicker">Results</div>
+        <h1>Project <span class="accent">Results and Impact</span></h1>
+        <h2>The output is both an explainable model and a working software demonstration.</h2>
+        <div class="grid3">
+          <div class="card"><h3>Visual Clarity</h3><p>Complex tables become a readable tree that is easier to present and discuss.</p></div>
+          <div class="card"><h3>Interpretability</h3><p>Every split can be justified by entropy and information gain.</p></div>
+          <div class="card"><h3>Working Software</h3><p>The project runs as a real application, not only as a theoretical explanation.</p></div>
+        </div>
+        <div class="meta">Key message: this is a complete demonstration of data mining theory implemented in code.</div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="inner">
+        <div class="kicker">Conclusion</div>
+        <h1>From Theory to <span class="accent">Working Software</span></h1>
+        <h2>The presentation now covers the data mining process, the program used, and the structure of the code.</h2>
+        <div class="grid3">
+          <div class="card"><h3>Achievement</h3><p>A full KDD workflow was implemented from preprocessing to interpretation.</p></div>
+          <div class="card"><h3>Implementation</h3><p>The codebase separates data, preprocessing, ID3 logic, and visualization clearly.</p></div>
+          <div class="card"><h3>Presentation Value</h3><p>You can now explain both what the algorithm does and how the project was built.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="controls">
+      <button class="btn" onclick="prevSlide()">&lt;</button>
+      <button class="btn" onclick="nextSlide()">&gt;</button>
+    </div>
+    <div class="indicator" id="indicator">01 / 10</div>
+  </div>
+
+  <script>
+    let current = 0;
+    const slides = document.querySelectorAll('.slide');
+    const indicator = document.getElementById('indicator');
+    const update = () => {
+      slides.forEach((slide, index) => slide.classList.toggle('active', index === current));
+      indicator.textContent = `${String(current + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}`;
+    };
+    window.nextSlide = () => { current = (current + 1) % slides.length; update(); };
+    window.prevSlide = () => { current = (current - 1 + slides.length) % slides.length; update(); };
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowRight' || event.key === ' ') nextSlide();
+      if (event.key === 'ArrowLeft') prevSlide();
+    });
+    update();
+  </script>
+</body>
+</html>

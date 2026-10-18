@@ -1,0 +1,5 @@
+src/App.tsx(2,16): error TS6133: 'Database' is declared but its value is never read.
+src/App.tsx(2,26): error TS6133: 'Eraser' is declared but its value is never read.
+src/App.tsx(4,62): error TS6133: 'zScoreNormalize' is declared but its value is never read.
+src/components/TreeVisualizer.tsx(2,21): error TS2307: Cannot find module 'd3' or its corresponding type declarations.
+src/utils/preprocessing.ts(15,3): error TS6133: 'targetAttr' is declared but its value is never read.

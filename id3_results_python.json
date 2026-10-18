@@ -1,0 +1,164 @@
+{
+  "weather": {
+    "dataset": "Weather",
+    "rows": 14,
+    "target": "Play",
+    "entropy": 0.9402859586706311,
+    "gains": {
+      "Outlook": 0.24674981977443933,
+      "Temperature": 0.02922256565895487,
+      "Humidity": 0.15183550136234159,
+      "Wind": 0.04812703040826949
+    },
+    "tree": {
+      "attribute": "Outlook",
+      "children": {
+        "Sunny": {
+          "attribute": "Humidity",
+          "children": {
+            "High": {
+              "isLeaf": true,
+              "label": "No",
+              "children": {}
+            },
+            "Normal": {
+              "isLeaf": true,
+              "label": "Yes",
+              "children": {}
+            }
+          },
+          "isLeaf": false
+        },
+        "Overcast": {
+          "isLeaf": true,
+          "label": "Yes",
+          "children": {}
+        },
+        "Rain": {
+          "attribute": "Wind",
+          "children": {
+            "Weak": {
+              "isLeaf": true,
+              "label": "Yes",
+              "children": {}
+            },
+            "Strong": {
+              "isLeaf": true,
+              "label": "No",
+              "children": {}
+            }
+          },
+          "isLeaf": false
+        }
+      },
+      "isLeaf": false
+    },
+    "predictions": [
+      "No",
+      "No",
+      "Yes",
+      "Yes",
+      "Yes",
+      "No",
+      "Yes",
+      "No",
+      "Yes",
+      "Yes",
+      "Yes",
+      "Yes",
+      "Yes",
+      "No"
+    ],
+    "actual": [
+      "No",
+      "No",
+      "Yes",
+      "Yes",
+      "Yes",
+      "No",
+      "Yes",
+      "No",
+      "Yes",
+      "Yes",
+      "Yes",
+      "Yes",
+      "Yes",
+      "No"
+    ],
+    "training_accuracy": 1.0,
+    "root_attribute": "Outlook"
+  },
+  "titanic_preprocessed": {
+    "dataset": "Titanic (mode-imputed + age-binned)",
+    "rows": 13,
+    "target": "Survived",
+    "entropy": 0.9957274520849255,
+    "gains": {
+      "Pclass": 0.15875941198982924,
+      "Sex": 0.9957274520849255,
+      "Age": 0.0036815326818669947,
+      "SibSp": 0.1875553423405738,
+      "Parch": 0.0726505290080024,
+      "Fare": 0.9957274520849255
+    },
+    "tree": {
+      "attribute": "Sex",
+      "children": {
+        "male": {
+          "isLeaf": true,
+          "label": "0",
+          "children": {}
+        },
+        "female": {
+          "isLeaf": true,
+          "label": "1",
+          "children": {}
+        }
+      },
+      "isLeaf": false
+    },
+    "predictions": [
+      "0",
+      "1",
+      "1",
+      "1",
+      "0",
+      "0",
+      "0",
+      "0",
+      "1",
+      "1",
+      "1",
+      "1",
+      "0"
+    ],
+    "actual": [
+      "0",
+      "1",
+      "1",
+      "1",
+      "0",
+      "0",
+      "0",
+      "0",
+      "1",
+      "1",
+      "1",
+      "1",
+      "0"
+    ],
+    "training_accuracy": 1.0,
+    "root_attribute": "Sex"
+  },
+  "comparison_basis": {
+    "typescript_files": [
+      "src/utils/id3-core.ts",
+      "src/utils/preprocessing.ts",
+      "src/utils/sample-data.ts"
+    ],
+    "notes": [
+      "Python logic mirrors the TypeScript entropy, information gain, recursive split, mode imputation, and equal-width binning behavior.",
+      "Both implementations are deterministic for the bundled datasets because attribute order follows the dataset column order."
+    ]
+  }
+}

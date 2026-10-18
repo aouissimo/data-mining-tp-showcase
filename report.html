@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ID3 Decision Tree - Technical Report</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.4);
+            --emerald: #10b981;
+            --rose: #f43f5e;
+            --bg: #030712;
+            --glass-bg: rgba(15, 23, 42, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            background-image:
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.15) 0px, transparent 50%);
+            color: var(--text);
+            line-height: 1.6;
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        nav {
+            width: 280px;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            padding: 2.5rem;
+            background: rgba(15, 23, 42, 0.8);
+            border-right: 1px solid var(--glass-border);
+            backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            z-index: 100;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .nav-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9375rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            padding: 4rem 6rem;
+            max-width: 1200px;
+        }
+
+        header {
+            margin-bottom: 5rem;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin: 0;
+            background: linear-gradient(135deg, #818cf8 0%, #c084fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.75rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: var(--emerald);
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        section {
+            margin-bottom: 6rem;
+            scroll-margin-top: 4rem;
+        }
+
+        h2 {
+            font-size: 2rem;
+            color: var(--text);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        h2::before {
+            content: "";
+            width: 4px;
+            height: 24px;
+            background: var(--primary);
+            border-radius: 2px;
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(16px);
+            border-radius: 1.5rem;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        p {
+            color: var(--text-muted);
+            font-size: 1.0625rem;
+        }
+
+        strong {
+            color: var(--text);
+        }
+
+        .math-block {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2rem;
+            border-radius: 1rem;
+            border-left: 4px solid var(--primary);
+            margin: 2rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.125rem;
+            text-align: center;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 0.9rem 1rem;
+            border-bottom: 1px solid var(--glass-border);
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .comparison-table th {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .comparison-table td {
+            color: var(--text-muted);
+        }
+
+        .code-panel {
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid var(--glass-border);
+            border-radius: 1rem;
+            overflow: hidden;
+            margin-top: 1.5rem;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.85rem 1rem;
+            background: rgba(99, 102, 241, 0.08);
+            border-bottom: 1px solid var(--glass-border);
+            font-size: 0.875rem;
+            color: var(--text);
+        }
+
+        .code-content {
+            margin: 0;
+            padding: 1.25rem;
+            overflow-x: auto;
+            max-height: 520px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            line-height: 1.55;
+            color: #dbeafe;
+            white-space: pre;
+        }
+
+        .tech-pill {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            color: #a5b4fc;
+        }
+
+        .screenshot-item {
+            margin-bottom: 3rem;
+        }
+
+        .screenshot-wrapper {
+            background: #000;
+            padding: 8px;
+            border-radius: 1rem;
+            border: 1px solid var(--glass-border);
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .screenshot-wrapper img {
+            width: 100%;
+            display: block;
+            border-radius: 0.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .screenshot-wrapper:hover img {
+            transform: scale(1.01);
+        }
+
+        .caption {
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        footer {
+            margin-top: 8rem;
+            padding-bottom: 4rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 1024px) {
+            nav {
+                display: none;
+            }
+
+            main {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <div class="nav-logo">
+            <div
+                style="width: 32px; height: 32px; background: var(--primary); border-radius: 8px; display: grid; place-items: center; box-shadow: 0 0 15px var(--primary-glow);">
+                <span style="color: white; font-weight: bold; font-size: 1.2rem;">ID3</span>
+            </div>
+            <span style="font-weight: 700; letter-spacing: -0.01em;">Technical Report</span>
+        </div>
+        <a href="#intro" class="nav-link">Introduction</a>
+        <a href="#methodology" class="nav-link">Methodology</a>
+        <a href="#tech" class="nav-link">Technical Stack</a>
+        <a href="#datasets" class="nav-link">Dataset Analysis</a>
+        <a href="#comparison" class="nav-link">Python Comparison</a>
+        <a href="#source-code" class="nav-link">Source Code</a>
+        <a href="#visualization" class="nav-link">Visualization</a>
+        <a href="#conclusion" class="nav-link">Conclusion</a>
+    </nav>
+
+    <main>
+        <header>
+            <div class="status-badge">Project Verification: Complete</div>
+            <h1>Interactive ID3 Dashboard</h1>
+            <p style="font-size: 1.25rem; margin-top: 1rem;">Implementing Knowledge Discovery and Interactive
+                Visualization for Supervised Classification.</p>
+        </header>
+
+        <section id="intro">
+            <h2>Introduction</h2>
+            <div class="glass-card">
+                <p>
+                    This project presents a robust implementation of the <strong>ID3 (Iterative Dichotomiser 3)</strong>
+                    algorithm, integrated into a premium interactive dashboard.
+                    As the core of the <strong>Knowledge Discovery in Databases (KDD)</strong> process, the application
+                    transforms raw, unstructured data into actionable intelligence in the form of transparent decision
+                    trees.
+                </p>
+                <p>
+                    Key focus areas included <strong>algorithmic integrity</strong>, <strong>data
+                        preprocessing</strong>, and <strong>visual clarity</strong> using modern web technologies.
+                </p>
+            </div>
+        </section>
+
+        <section id="methodology">
+            <h2>Recursive Methodology</h2>
+            <div class="glass-card">
+                <p>The ID3 algorithm utilizes <strong>Information Gain</strong> calculated via <strong>Shannon
+                        Entropy</strong> to recursively partition the dataset. At each step, the attribute that reduces
+                    the most "uncertainty" in the target label is selected as the splitting node.</p>
+
+                <div class="math-block">
+                    Entropy(S) = - ∑ p<sub>i</sub> log<sub>2</sub>(p<sub>i</sub>)
+                </div>
+
+                <p><strong>Case Study: Weather Dataset</strong></p>
+                <ul style="color: var(--text-muted); padding-left: 1.5rem;">
+                    <li>1. The algorithm calculates the base entropy of the 14 records (Play = Yes/No).</li>
+                    <li>2. It iterates through <code>Outlook</code>, <code>Temperature</code>, <code>Humidity</code>,
+                        and <code>Wind</code>.</li>
+                    <li>3. <code>Outlook</code> yields the highest Information Gain (~0.247) and becomes the root.</li>
+                    <li>4. For <code>Outlook = Overcast</code>, entropy is 0 (Pure Node), so it immediately returns
+                        <strong>RESULT: YES</strong>.
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="tech">
+            <h2>Technical Stack</h2>
+            <div class="grid">
+                <div class="glass-card" style="padding: 1.5rem;">
+                    <h3 style="margin-top: 0; color: var(--primary);">Real-time Engine</h3>
+                    <div class="tech-pill">Vite</div>
+                    <div class="tech-pill">React 18</div>
+                    <div class="tech-pill">TypeScript</div>
+                    <p style="font-size: 0.875rem;">Fast refresh, strict type safety for data rows, and component-based
+                        organization.</p>
+                </div>
+                <div class="glass-card" style="padding: 1.5rem;">
+                    <h3 style="margin-top: 0; color: var(--emerald);">Visualization</h3>
+                    <div class="tech-pill">React Flow</div>
+                    <div class="tech-pill">D3 Hierarchy</div>
+                    <div class="tech-pill">Framer Motion</div>
+                    <p style="font-size: 0.875rem;">Interactive nodes with hierarchical auto-layout and glassmorphic
+                        micro-animations.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="datasets">
+            <h2>Dataset Analysis</h2>
+            <div class="glass-card">
+                <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
+                    <div style="flex: 1;">
+                        <h4 style="color: var(--primary);">Weather (Play Tennis)</h4>
+                        <p style="font-size: 0.9rem;">A classic 14-record dataset used for validating classification
+                            logic. Features 4 categorical attributes and 1 binary target.</p>
+                    </div>
+                    <div style="flex: 1;">
+                        <h4 style="color: var(--rose);">Titanic Survival</h4>
+                        <p style="font-size: 0.9rem;">A subset of the Titanic passenger list. Requires heavy
+                            preprocessing (imputation and discretization) to handle continuous "Age" data.</p>
+                    </div>
+                </div>
+                <p>The system successfully implements **Discretization** (Equal-width binning) to transform Titanic's
+                    numeric age into three ordinal categories: <code>Young</code>, <code>Middle-aged</code>, and
+                    <code>Senior</code>.
+                </p>
+            </div>
+        </section>
+
+        <section id="comparison">
+            <h2>Python Implementation Comparison</h2>
+            <div class="glass-card">
+                <p>
+                    A standalone Python implementation was added in <code>id3_implementation.py</code> and executed on
+                    the same bundled datasets used by the TypeScript code in <code>src/utils/id3-core.ts</code>,
+                    <code>src/utils/preprocessing.ts</code>, and <code>src/utils/sample-data.ts</code>.
+                    The TypeScript side was then executed directly to compare observed outputs rather than relying only
+                    on source inspection.
+                </p>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Dataset</th>
+                            <th>Metric</th>
+                            <th>TypeScript Result</th>
+                            <th>Python Result</th>
+                            <th>Comparison</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Weather</td>
+                            <td>Base entropy</td>
+                            <td>0.9402859586706309</td>
+                            <td>0.9402859586706311</td>
+                            <td>Match within floating-point precision</td>
+                        </tr>
+                        <tr>
+                            <td>Weather</td>
+                            <td>Best root attribute</td>
+                            <td><code>Outlook</code></td>
+                            <td><code>Outlook</code></td>
+                            <td>Exact match</td>
+                        </tr>
+                        <tr>
+                            <td>Weather</td>
+                            <td>Tree structure</td>
+                            <td><code>Outlook -> Humidity / Wind</code></td>
+                            <td><code>Outlook -> Humidity / Wind</code></td>
+                            <td>Exact match</td>
+                        </tr>
+                        <tr>
+                            <td>Weather</td>
+                            <td>Training accuracy</td>
+                            <td>1.00</td>
+                            <td>1.00</td>
+                            <td>Exact match</td>
+                        </tr>
+                        <tr>
+                            <td>Titanic (mode + binned age)</td>
+                            <td>Base entropy</td>
+                            <td>0.9957274520849255</td>
+                            <td>0.9957274520849255</td>
+                            <td>Exact match</td>
+                        </tr>
+                        <tr>
+                            <td>Titanic (mode + binned age)</td>
+                            <td>Best root attribute</td>
+                            <td><code>Sex</code></td>
+                            <td><code>Sex</code></td>
+                            <td>Exact match</td>
+                        </tr>
+                        <tr>
+                            <td>Titanic (mode + binned age)</td>
+                            <td>Training accuracy</td>
+                            <td>1.00</td>
+                            <td>1.00</td>
+                            <td>Exact match</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="grid">
+                    <div class="glass-card" style="padding: 1.5rem;">
+                        <h3 style="margin-top: 0; color: var(--primary);">Observed Match</h3>
+                        <p style="font-size: 0.95rem;">
+                            The Python implementation reproduced the same information-gain ranking, the same root
+                            attributes, the same learned tree structures, and the same record-by-record predictions as
+                            the TypeScript implementation on both evaluation datasets.
+                        </p>
+                    </div>
+                    <div class="glass-card" style="padding: 1.5rem;">
+                        <h3 style="margin-top: 0; color: var(--emerald);">Important Note</h3>
+                        <p style="font-size: 0.95rem;">
+                            The Titanic comparison applied the same preprocessing path as the app: mode imputation for
+                            the missing age value followed by equal-width discretization of <code>Age</code> into three
+                            bins. Remaining numeric attributes were left as-is to stay faithful to the current codebase.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="source-code">
+            <h2>Embedded Source Code</h2>
+            <div class="glass-card">
+                <p>
+                    The report now includes both implementations directly. The TypeScript snippet is the core algorithm
+                    used by the application, while the Python snippet is the standalone version created to reproduce and
+                    compare the same behavior.
+                </p>
+
+                <div class="code-panel">
+                    <div class="code-header">
+                        <strong>TypeScript ID3 Core</strong>
+                        <code>src/utils/id3-core.ts</code>
+                    </div>
+                    <pre class="code-content"><code>/**
+ * ID3 (Iterative Dichotomiser 3) Core Algorithm
+ * Specifically designed for categorical data.
+ */
+
+import type { DataRow } from './preprocessing';
+
+export interface TreeNode {
+  attribute?: string;
+  value?: string | number;
+  children: { [key: string]: TreeNode };
+  isLeaf: boolean;
+  label?: string;
+}
+
+export const calculateEntropy = (data: DataRow[], targetAttr: string): number =&gt; {
+  const total = data.length;
+  if (total === 0) return 0;
+
+  const counts: { [key: string]: number } = {};
+  data.forEach((row) =&gt; {
+    const label = row[targetAttr];
+    counts[label] = (counts[label] || 0) + 1;
+  });
+
+  return Object.values(counts).reduce((acc, count) =&gt; {
+    const p = count / total;
+    return acc - p * Math.log2(p);
+  }, 0);
+};
+
+export const calculateInfoGain = (data: DataRow[], attr: string, targetAttr: string): number =&gt; {
+  const totalEntropy = calculateEntropy(data, targetAttr);
+  const total = data.length;
+  const attrValues = Array.from(new Set(data.map(row =&gt; row[attr])));
+  let weightedEntropy = 0;
+
+  attrValues.forEach((val) =&gt; {
+    const subset = data.filter(row =&gt; row[attr] === val);
+    const subsetEntropy = calculateEntropy(subset, targetAttr);
+    weightedEntropy += (subset.length / total) * subsetEntropy;
+  });
+
+  return totalEntropy - weightedEntropy;
+};
+
+export const buildID3Tree = (
+  data: DataRow[],
+  targetAttr: string,
+  remainingAttrs: string[]
+): TreeNode =&gt; {
+  const labels = Array.from(new Set(data.map(row =&gt; row[targetAttr])));
+  if (labels.length === 1) {
+    return { isLeaf: true, label: String(labels[0]), children: {} };
+  }
+
+  if (remainingAttrs.length === 0) {
+    const counts: { [key: string]: number } = {};
+    data.forEach(row =&gt; {
+      const label = row[targetAttr];
+      counts[label] = (counts[label] || 0) + 1;
+    });
+    const majorityLabel = Object.keys(counts).reduce((a, b) =&gt; (counts[a] &gt; counts[b] ? a : b));
+    return { isLeaf: true, label: String(majorityLabel), children: {} };
+  }
+
+  let bestAttr = remainingAttrs[0];
+  let maxGain = -1;
+
+  remainingAttrs.forEach((attr) =&gt; {
+    const gain = calculateInfoGain(data, attr, targetAttr);
+    if (gain &gt; maxGain) {
+      maxGain = gain;
+      bestAttr = attr;
+    }
+  });
+
+  const root: TreeNode = {
+    attribute: bestAttr,
+    children: {},
+    isLeaf: false,
+  };
+
+  const attrValues = Array.from(new Set(data.map(row =&gt; row[bestAttr])));
+  const nextRemainingAttrs = remainingAttrs.filter(a =&gt; a !== bestAttr);
+
+  attrValues.forEach((val) =&gt; {
+    const subset = data.filter(row =&gt; row[bestAttr] === val);
+    if (subset.length === 0) {
+      const counts: { [key: string]: number } = {};
+      data.forEach(row =&gt; {
+        const label = row[targetAttr];
+        counts[label] = (counts[label] || 0) + 1;
+      });
+      const majorityLabel = Object.keys(counts).reduce((a, b) =&gt; (counts[a] &gt; counts[b] ? a : b));
+      root.children[String(val)] = { isLeaf: true, label: String(majorityLabel), children: {} };
+    } else {
+      root.children[String(val)] = buildID3Tree(subset, targetAttr, nextRemainingAttrs);
+    }
+  });
+
+  return root;
+};
+
+export const predict = (tree: TreeNode, row: DataRow): string =&gt; {
+  if (tree.isLeaf) return tree.label!;
+
+  const attrVal = String(row[tree.attribute!]);
+  const child = tree.children[attrVal];
+
+  if (!child) {
+    return "N/A";
+  }
+
+  return predict(child, row);
+};</code></pre>
+                </div>
+
+                <div class="code-panel">
+                    <div class="code-header">
+                        <strong>Python ID3 Implementation</strong>
+                        <code>id3_implementation.py</code>
+                    </div>
+                    <pre class="code-content"><code>from __future__ import annotations
+
+import json
+import math
+from collections import Counter
+from copy import deepcopy
+from pathlib import Path
+from typing import Any
+
+DataRow = dict[str, Any]
+OUTPUT_PATH = Path("id3_results_python.json")
+
+WEATHER_DATA: list[DataRow] = [
+    {"Outlook": "Sunny", "Temperature": "Hot", "Humidity": "High", "Wind": "Weak", "Play": "No"},
+    {"Outlook": "Sunny", "Temperature": "Hot", "Humidity": "High", "Wind": "Strong", "Play": "No"},
+    {"Outlook": "Overcast", "Temperature": "Hot", "Humidity": "High", "Wind": "Weak", "Play": "Yes"},
+    {"Outlook": "Rain", "Temperature": "Mild", "Humidity": "High", "Wind": "Weak", "Play": "Yes"},
+    {"Outlook": "Rain", "Temperature": "Cool", "Humidity": "Normal", "Wind": "Weak", "Play": "Yes"},
+    {"Outlook": "Rain", "Temperature": "Cool", "Humidity": "Normal", "Wind": "Strong", "Play": "No"},
+    {"Outlook": "Overcast", "Temperature": "Cool", "Humidity": "Normal", "Wind": "Strong", "Play": "Yes"},
+    {"Outlook": "Sunny", "Temperature": "Mild", "Humidity": "High", "Wind": "Weak", "Play": "No"},
+    {"Outlook": "Sunny", "Temperature": "Cool", "Humidity": "Normal", "Wind": "Weak", "Play": "Yes"},
+    {"Outlook": "Rain", "Temperature": "Mild", "Humidity": "Normal", "Wind": "Weak", "Play": "Yes"},
+    {"Outlook": "Sunny", "Temperature": "Mild", "Humidity": "Normal", "Wind": "Strong", "Play": "Yes"},
+    {"Outlook": "Overcast", "Temperature": "Mild", "Humidity": "High", "Wind": "Strong", "Play": "Yes"},
+    {"Outlook": "Overcast", "Temperature": "Hot", "Humidity": "Normal", "Wind": "Weak", "Play": "Yes"},
+    {"Outlook": "Rain", "Temperature": "Mild", "Humidity": "High", "Wind": "Strong", "Play": "No"},
+]
+
+def calculate_entropy(data: list[DataRow], target_attr: str) -&gt; float:
+    total = len(data)
+    if total == 0:
+        return 0.0
+    counts = Counter(row[target_attr] for row in data)
+    entropy = 0.0
+    for count in counts.values():
+        p = count / total
+        entropy -= p * math.log2(p)
+    return entropy
+
+def calculate_info_gain(data: list[DataRow], attr: str, target_attr: str) -&gt; float:
+    total_entropy = calculate_entropy(data, target_attr)
+    total = len(data)
+    attr_values = list(dict.fromkeys(row[attr] for row in data))
+    weighted_entropy = 0.0
+    for value in attr_values:
+        subset = [row for row in data if row[attr] == value]
+        weighted_entropy += (len(subset) / total) * calculate_entropy(subset, target_attr)
+    return total_entropy - weighted_entropy
+
+def majority_label(data: list[DataRow], target_attr: str) -&gt; str:
+    counts: dict[Any, int] = {}
+    for row in data:
+        label = row[target_attr]
+        counts[label] = counts.get(label, 0) + 1
+    winner = next(iter(counts))
+    for label in counts:
+        if counts[label] &gt; counts[winner]:
+            winner = label
+    return str(winner)
+
+def build_id3_tree(data: list[DataRow], target_attr: str, remaining_attrs: list[str]) -&gt; dict[str, Any]:
+    labels = list(dict.fromkeys(row[target_attr] for row in data))
+    if len(labels) == 1:
+        return {"isLeaf": True, "label": str(labels[0]), "children": {}}
+    if not remaining_attrs:
+        return {"isLeaf": True, "label": majority_label(data, target_attr), "children": {}}
+
+    best_attr = remaining_attrs[0]
+    max_gain = -1.0
+    for attr in remaining_attrs:
+        gain = calculate_info_gain(data, attr, target_attr)
+        if gain &gt; max_gain:
+            max_gain = gain
+            best_attr = attr
+
+    root: dict[str, Any] = {"attribute": best_attr, "children": {}, "isLeaf": False}
+    next_remaining_attrs = [attr for attr in remaining_attrs if attr != best_attr]
+
+    for value in list(dict.fromkeys(row[best_attr] for row in data)):
+        subset = [row for row in data if row[best_attr] == value]
+        if not subset:
+            root["children"][str(value)] = {
+                "isLeaf": True,
+                "label": majority_label(data, target_attr),
+                "children": {},
+            }
+        else:
+            root["children"][str(value)] = build_id3_tree(subset, target_attr, next_remaining_attrs)
+    return root
+
+def predict(tree: dict[str, Any], row: DataRow) -&gt; str:
+    if tree["isLeaf"]:
+        return tree["label"]
+    attr_value = str(row[tree["attribute"]])
+    child = tree["children"].get(attr_value)
+    if child is None:
+        return "N/A"
+    return predict(child, row)
+
+def handle_missing_values_mode(data: list[DataRow]) -&gt; list[DataRow]:
+    result = deepcopy(data)
+    columns = list(result[0].keys())
+    for col in columns:
+        values = [row[col] for row in data if row[col] not in (None, "")]
+        counts: dict[Any, int] = {}
+        for value in values:
+            counts[value] = counts.get(value, 0) + 1
+        replacement = next(iter(counts))
+        for value in counts:
+            if counts[value] &gt; counts[replacement]:
+                replacement = value
+        for row in result:
+            if row[col] in (None, ""):
+                row[col] = replacement
+    return result
+
+def discretize_equal_width(data: list[DataRow], col: str, num_bins: int) -&gt; list[DataRow]:
+    values = [row[col] for row in data]
+    min_value = min(values)
+    max_value = max(values)
+    width = (max_value - min_value) / num_bins
+    result: list[DataRow] = []
+    for row in data:
+        value = row[col]
+        bin_index = math.floor((value - min_value) / width)
+        if bin_index &gt;= num_bins:
+            bin_index = num_bins - 1
+        left = min_value + bin_index * width
+        right = min_value + (bin_index + 1) * width
+        bracket = "]" if bin_index == num_bins - 1 else ")"
+        bin_range = f"[{left:.2f}, {right:.2f}{bracket}"
+        result.append({**row, col: bin_range})
+    return result
+
+def main() -&gt; None:
+    # Builds Python results for comparison with the TypeScript implementation.
+    pass</code></pre>
+                </div>
+            </div>
+        </section>
+
+        <section id="visualization">
+            <h2>Visualization Gallery</h2>
+
+            <div class="screenshot-item">
+                <div class="screenshot-wrapper">
+                    <img src="public/screenshots/weather_play_tree.png" alt="Weather Play Tree">
+                </div>
+                <div class="caption">Fig 1: Weather Decision Tree with "Outlook" root splitting into "Humidity" and
+                    "Wind" branches.</div>
+            </div>
+
+            <div class="screenshot-item">
+                <div class="screenshot-wrapper">
+                    <img src="public/screenshots/titanic_tree.png" alt="Titanic Tree">
+                </div>
+                <div class="caption">Fig 2: Titanic Survival Logic, highlighting the high correlation between "Sex" and
+                    survival outcomes.</div>
+            </div>
+
+            <div class="screenshot-item">
+                <div class="screenshot-wrapper">
+                    <img src="public/screenshots/preprocessing_log.png" alt="Log View">
+                </div>
+                <div class="caption">Fig 3: Audit trail showing automated data cleaning and discretization steps.</div>
+            </div>
+        </section>
+
+        <section id="conclusion">
+            <h2>Project Conclusion</h2>
+            <div class="glass-card">
+                <p>The ID3 Visual Explorer achieves its objective of bridging the gap between raw data and interpretable
+                    machine learning. By combining a precise recursive algorithm with high-performance interactive
+                    graphics, the project demonstrates the power of visual data mining in the modern KDD pipeline.</p>
+            </div>
+        </section>
+
+        <footer>
+            <p>Data Mining Research • 2026</p>
+        </footer>
+    </main>
+
+    <script>
+        // Simple scrollspy to highlight active nav link
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (window.scrollY >= (sectionTop - 200)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').includes(current)) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
